@@ -21,24 +21,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using DSharpPlus.Net;
-using Newtonsoft.Json.Linq;
+using DSharpPlus.Entities;
 
-namespace DSharpPlus.Exceptions;
-
-/// <summary>
-/// Represents an exception thrown when requester doesn't have necessary permissions to complete the request.
-/// </summary>
-public class UnauthorizedException : DiscordException
+namespace DSharpPlus;
+public interface IMessageCacheProvider
 {
-    internal UnauthorizedException(BaseRestRequest request, RestResponse response) : base("Unauthorized: " + response.ResponseCode)
-    {
-        this.WebRequest = request;
-        this.WebResponse = response;
-        if (JObject.Parse(response.Response).TryGetValue("message", StringComparison.Ordinal, out JToken? message))
-        {
-            this.JsonMessage = message.ToString();
-        }
-    }
+    /// <summary>
+    /// Add a <see cref="DiscordMessage"/> object to the cache.
+    /// </summary>
+    /// <param name="message">The <see cref="DiscordMessage"/> object to add to the cache.</param>
+    void Add(DiscordMessage message);
+
+    /// <summary>
+    /// Remove the <see cref="DiscordMessage"/> object associated with the message ID from the cache. 
+    /// </summary>
+    /// <param name="messageId">The ID of the message to remove from the cache.</param>
+    void Remove(ulong messageId);
+
+    /// <summary>
+    /// Try to get a <see cref="DiscordMessage"/> object associated with the message ID from the cache.
+    /// </summary>
+    /// <param name="messageId">The ID of the message to retrieve from the cache.</param>
+    /// <param name="message">The <see cref="DiscordMessage"/> object retrieved from the cache, if it exists; null otherwise.</param>
+    /// <returns><see langword="true"/> if the message can be retrieved from the cache, <see langword="false"/> otherwise.</returns>
+    bool TryGet(ulong messageId, out DiscordMessage? message);
 }
